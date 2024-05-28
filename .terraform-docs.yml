@@ -1,0 +1,69 @@
+formatter: "markdown table"
+
+content: |-
+  # Codecommit AWS module
+  
+  # Simple repo:
+
+  ```hcl
+    module "simple" {
+      source  = "tokarev-artem/codecommit/aws"
+
+      repository_name = "react"
+      description     = "Frontend app"
+
+      tags = {
+        Role = "frontend"
+      }
+    }
+  ```
+
+  # Multiple repositories:
+  ```hcl
+    module "multiple" {
+      for_each = {
+        frontend-react = {
+          description = "react app"
+        }
+        backend-typescript = {
+          description = "backend app"
+        }
+      }
+      source          = "tokarev-artem/codecommit/aws"
+      repository_name = each.key
+      description     = each.value.description
+      kms_key_id      = "arn:aws:kms:eu-central-1:1234567891011:key/cb121336-dddd-4a0d-abcd-914f5d2c2e2a"
+
+      rule_template_description       = "Approval rule template for pull requests"
+      rule_number_of_approvals_needed = 2
+      rule_approval_pool_members      = ["arn:aws:iam::1234567891011:user/JohnSnow"]
+      rule_destination_refs           = ["refs/heads/main", "refs/heads/dev"]
+
+      trigger_destination_arn = "arn:aws:sns:eu-central-1:1234567891011:test-topic"
+      trigger_custom_data     = "Custom data for the trigger"
+      trigger_events          = ["updateReference", "createReference"]
+      trigger_branches        = ["dev", "main"]
+
+      tags = {
+        ownder = "horns-and-hoofs"
+      }
+    }
+  ```
+
+  {{ .Header }}
+
+  {{ .Providers }}
+  
+  {{ .Inputs }} 
+
+  {{ .Outputs }}
+  
+output:
+  file: "README.md"
+  mode: replace
+  template: |-
+    {{ .Content }}
+
+sort:
+  enabled: true
+  by: required
